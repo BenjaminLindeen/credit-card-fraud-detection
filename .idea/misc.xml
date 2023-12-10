@@ -7,6 +7,20 @@
   <component name="RMarkdownSettings">
     <option name="renderProfiles">
       <map>
+        <entry key="file://$USER_HOME$/Downloads/Project (1).Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$USER_HOME$/Downloads" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$USER_HOME$/Downloads/Project.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$USER_HOME$/Downloads" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/R/project.rmd">
           <value>
             <RMarkdownRenderProfile>

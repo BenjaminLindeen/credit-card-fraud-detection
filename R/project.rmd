@@ -3,7 +3,7 @@ title: "IE 5533 Final Project"
 author: "Benjamin Lindeen, Michael Ginzburg"
 output: pdf_document
 params:
-dataset: "C:/Users/Benjamin/development/school/ie5533/credit-card-fraud-detection/datatset/card_transdata.csv"
+    dataset: "C:/Users/Benjamin/development/school/ie5533/credit-card-fraud-detection/datatset/card_transdata.csv"
 ---
 
 ## Detecting Credit Card Fraud
