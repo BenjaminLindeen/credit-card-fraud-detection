@@ -23,6 +23,11 @@ ggplot(dataset, aes(x = as.factor(fraud))) +
 # Data Manipulation
 dataset <- na.omit(dataset)
 
+ggplot(dataset, aes(x = distance_from_home)) + geom_histogram(binwidth = 10, fill = "blue", color = "black")
+ggplot(dataset, aes(x = as.factor(fraud))) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Class Distribution in Dataset", x = "Fraud", y = "Count")
+
 # Split Data
 set.seed(123)
 partition <- createDataPartition(dataset$fraud, p = 0.8, list = FALSE)
@@ -37,13 +42,21 @@ labels <- training$fraud                # Target variable
 dup_size <- 944.43  # Adjust as needed
 smote_data <- SMOTE(features, labels, K = 5, dup_size = dup_size)
 
-# Combine with original training data
-synthetic_samples <- smote_data$data
-synthetic_samples$fraud <- as.numeric(synthetic_samples$class)
-training_balanced <- rbind(training, synthetic_samples)
+# Combine the synthetic samples with the original training data
+synthetic_samples2 <- smote_data$data
+synthetic_samples2 <- synthetic_samples2[, !names(synthetic_samples2) %in% "class"]
+synthetic_samples2$fraud <- rep(1, nrow(synthetic_samples2))  # Assign the minority class label
 
-# Check new class distribution
-table(training_balanced$fraud)
+# Add the target variable to the training set for the features
+training_features2 <- training[, -ncol(training)]
+training_features2$fraud <- training$fraud
+
+
+# Combine datasets
+training_balanced1 <- rbind(training_features2, synthetic_samples2)
+
+# Check the class distribution
+table(training_balanced1$fraud)
 
 # Logistic Regression Model
 training_balanced$fraud <- as.numeric(as.character(training_balanced$fraud))
