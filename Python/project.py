@@ -6,10 +6,13 @@ from imblearn.over_sampling import SMOTE
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.regularizers import l2
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 
 # Load the dataset
-file_path = "C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv"
+# file_path = "C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv"
+file_path = "/Users/benjaminlindeen/developement/credit-card-fraud-detection/datatset/card_transdata.csv"
 data = pd.read_csv(file_path)
 
 # Log transformation
@@ -42,19 +45,19 @@ class_weights = {0: 1 / y_train.value_counts()[0], 1: 1 / y_train.value_counts()
 
 # Building the ANN model
 model_smote = Sequential([
-    Dense(64, activation='relu', input_shape=(X_train_smote.shape[1],)),
-    Dense(32, activation='relu'),
-    Dense(16, activation='relu'),
+    Dense(32, activation='relu', input_shape=(X_train_smote.shape[1],), kernel_regularizer=l2(0.001)),
+    Dropout(0.5),
+    Dense(16, activation='relu', kernel_regularizer=l2(0.001)),
+    Dropout(0.5),
     Dense(1, activation='sigmoid')
 ])
 
-# Compiling the model with class weights
-model_smote.compile(optimizer=Adam(), loss='binary_crossentropy', metrics=['accuracy'])
+# Compile and fit the model with early stopping
+from tensorflow.keras.callbacks import EarlyStopping
+early_stopping = EarlyStopping(monitor='val_loss', patience=3, mode='min')
 
-# Training the model with class weights
-model_smote.fit(X_train_smote, y_train_smote, class_weight=class_weights, batch_size=32, epochs=10, validation_split=0.1)
-
-# Rest of your evaluation code...
+model_smote.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
+model_smote.fit(X_train_smote, y_train_smote, class_weight=class_weights, batch_size=64, epochs=100, validation_split=0.1, callbacks=[early_stopping])
 
 
 # Evaluate the model on test data
