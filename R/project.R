@@ -6,6 +6,7 @@ library(rpart.plot)
 library(xgboost)
 library(pROC)
 library(dplyr)
+library(pROC)
 
 # Load dataset
 dataset <- read.csv("C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv")
@@ -22,7 +23,7 @@ dataset <- dataset %>%
 
 # Remove original skewed variables
 dataset <- dataset %>%
-  select(distance_from_home, distance_from_last_transaction, ratio_to_median_purchase_price)
+  select(-distance_from_home, -distance_from_last_transaction, -ratio_to_median_purchase_price)
 
 # Split Data
 set.seed(123)
@@ -33,10 +34,13 @@ testing <- dataset[-partition, ]
 # Calculate class weights
 class_weights <- ifelse(training$fraud == 1, (1 / table(training$fraud)[2]), (1 / table(training$fraud)[1]))
 
+
 # Logistic Regression Model with class weights
 log_model <- glm(fraud ~ ., data = training, family = binomial(), weights = class_weights)
+
+
 predictions <- predict(log_model, testing, type = "response")
-predictions <- ifelse(predictions > 0.5, 1, 0)
+predictions <- ifelse(predictions > 0.2, 1, 0)
 confusionMatrix(factor(predictions), factor(testing$fraud))
 
 # Linear Regression Model
@@ -46,7 +50,7 @@ summary(lin_model)  # This will give you the model summary including coefficient
 # Predictions from the linear model
 predictions_lin <- predict(lin_model, testing)
 # Thresholding at 0.5 to determine class labels, not recommended for actual classification tasks
-predicted_classes_lin <- ifelse(predictions_lin > 0.5, 1, 0)
+predicted_classes_lin <- ifelse(predictions_lin > 0.2, 1, 0)
 
 # Evaluate predictions
 confusionMatrix(factor(predicted_classes_lin), factor(testing$fraud))
