@@ -4,7 +4,6 @@ library(ggplot2)
 library(rpart)
 library(rpart.plot)
 library(xgboost)
-library(ggcorrplot)
 library(pROC)
 library(dplyr)
 
@@ -14,24 +13,16 @@ dataset <- read.csv("C:/Users/Benjamin/development/credit-card-fraud-detection/d
 # Data Manipulation
 dataset <- na.omit(dataset)
 
-# EDA
-summary(dataset)
-head(dataset)
-dim(dataset)
-plot_list <- list()
-num_vars <- names(dataset)[sapply(dataset, is.numeric)]  # Identify numeric variables
+# Apply log transformation to skewed variables
+small_constant <- 0.0000001
+dataset <- dataset %>%
+  mutate(distance_from_home_log = log(ifelse(distance_from_home <= 0, small_constant, distance_from_home)),
+         distance_from_last_transaction_log = log(ifelse(distance_from_last_transaction <= 0, small_constant, distance_from_last_transaction)),
+         ratio_to_median_purchase_price_log = log(ifelse(ratio_to_median_purchase_price <= 0, small_constant, ratio_to_median_purchase_price)))
 
-for (var in num_vars) {
-    p <- ggplot(dataset, aes_string(x = var)) +
-         geom_histogram(binwidth = 10, fill = "blue", color = "black") +
-         labs(title = paste("Distribution of", var), x = var, y = "Count") +
-         theme_minimal()
-    print(p)  # Explicitly print the plot
-    Sys.sleep(1)  # Add a short delay to ensure plot is rendered
-}
-
-
-
+# Remove original skewed variables
+dataset <- dataset %>%
+  select(distance_from_home, distance_from_last_transaction, ratio_to_median_purchase_price)
 
 # Split Data
 set.seed(123)
@@ -48,21 +39,35 @@ predictions <- predict(log_model, testing, type = "response")
 predictions <- ifelse(predictions > 0.5, 1, 0)
 confusionMatrix(factor(predictions), factor(testing$fraud))
 
-# Decision Tree Model
+# Linear Regression Model
+lin_model <- lm(fraud ~ ., data = training)
+summary(lin_model)  # This will give you the model summary including coefficients for each variable
+
+# Predictions from the linear model
+predictions_lin <- predict(lin_model, testing)
+# Thresholding at 0.5 to determine class labels, not recommended for actual classification tasks
+predicted_classes_lin <- ifelse(predictions_lin > 0.5, 1, 0)
+
+# Evaluate predictions
+confusionMatrix(factor(predicted_classes_lin), factor(testing$fraud))
+
+# ... [rest of your code]
+
+# Decision Tree Model using the log-transformed variables
 tree_model <- rpart(fraud ~ ., data = training, method = "class", weights = class_weights)
-predictions <- predict(tree_model, testing, type = "class")
+predictions <- predict(tree_model, newdata = testing, type = "class")
 predictions_factor <- factor(predictions, levels = c(0, 1))
 testing_fraud_factor <- factor(testing$fraud, levels = c(0, 1))
 confusionMatrix(predictions_factor, testing_fraud_factor)
 rpart.plot(tree_model, type = 3, box.palette = "RdBu", shadow.col = "gray", branch = 1, extra = 102, under = TRUE, cex = 0.6, tweak = 1.2)
 
-# Gradient Boosting Model
-train_data_xgb <- xgb.DMatrix(data = as.matrix(training[, -ncol(training)]), label = training$fraud)
-valid_data_xgb <- xgb.DMatrix(data = as.matrix(testing[, -ncol(testing)]), label = testing$fraud)
+# Gradient Boosting Model using the log-transformed variables
+train_data_xgb <- xgb.DMatrix(data = as.matrix(training[, !names(training) %in% "fraud"]), label = training$fraud)
+valid_data_xgb <- xgb.DMatrix(data = as.matrix(testing[, !names(testing) %in% "fraud"]), label = testing$fraud)
 scale_pos_weight <- sum(training$fraud == 0) / sum(training$fraud == 1)
 params <- list(booster = "gbtree", objective = "binary:logistic", eta = 0.1, max_depth = 6, scale_pos_weight = scale_pos_weight)
 watchlist <- list(train = train_data_xgb, eval = valid_data_xgb)
-xgb_model <- xgb.train(params, train_data_xgb, nrounds = 100, watchlist, early_stopping_rounds = 10)
+xgb_model <- xgb.train(params, train_data_xgb, nrounds = 1, watchlist, early_stopping_rounds = 10)
 xgb_predictions <- predict(xgb_model, valid_data_xgb, ntreelimit = xgb_model$best_ntreelimit)
 xgb_predictions <- ifelse(xgb_predictions > 0.5, 1, 0)
 confusionMatrix(factor(xgb_predictions), factor(testing$fraud))
