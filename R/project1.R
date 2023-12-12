@@ -9,7 +9,7 @@ library(ggcorrplot)
 library(pROC)
 
 # Load dataset
-dataset <- read.csv("C:/Users/Benjamin/development/school/ie5533/credit-card-fraud-detection/datatset/card_transdata.csv")
+dataset <- read.csv("C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv")
 
 # EDA
 summary(dataset)
@@ -64,3 +64,5 @@ training_balanced1 <- rbind(training_features1, synthetic_samples1)
 table(training_balanced1$fraud)
 # Proceed with the rest of the model training and evaluation...
 # (Logistic Regression, Decision Tree, ANN, Gradient Boosting, etc.)
+
+# Define Features and Labels for SMOTE
