@@ -78,9 +78,6 @@ print(paste("Logistic Regression - Precision:", precision_log))
 print(paste("Logistic Regression - Recall:", recall_log))
 print(paste("Logistic Regression - F1 Score:", f1_score_log))
 
-# Evaluate predictions
-confusionMatrix(factor(predicted_classes_lin), factor(testing$fraud))
-
 # Decision Tree Model using the log-transformed variables
 tree_model <- rpart(fraud ~ ., data = training, method = "class", weights = class_weights)
 predictions <- predict(tree_model, newdata = testing, type = "class")
