@@ -1,14 +1,3 @@
----
-title: "IE 5533 Final Project"
-author: "Benjamin Lindeen, Michael Ginzburg"
-output: pdf_document
-params:
-    dataset: "C:/Users/Benjamin/development/school/ie5533/credit-card-fraud-detection/datatset/card_transdata.csv"
----
-
-## Detecting Credit Card Fraud
-
-```{r setup}
 set.seed(5533)
 # library(GPUTools)
 # library(cudaBayesreg)
@@ -30,14 +19,12 @@ library(ROSE)
 library(tensorflow)
 library(reticulate)
 use_python("C:/Users/Benjamin/Documents/.virtualenvs/r-reticulate/Scripts/python.exe")
+data <- read.csv("C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv")
 
-data <- read.csv(params$dataset)
 splitIndex <- createDataPartition(data$fraud, p = .80, list = FALSE, times = 1)
 trainData <- data[splitIndex,]
 testData <- data[-splitIndex,]
-```
 
-```{r}
 # Building the logistic regression model
 model <- glm(fraud ~ ., data = trainData, family = "binomial")
 
@@ -62,9 +49,8 @@ auc_value <- auc(roc_result)
 
 # Print AUC
 print(paste("AUC:", auc_value))
-```
-## Decision Tree
-```{r}
+
+# Plot ROC Curve
 model <- rpart(fraud ~ ., data = trainData, method = "class")
 
 # Plotting the tree
@@ -80,50 +66,28 @@ print(confusionMatrix)
 # Calculating accuracy
 accuracy <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
 print(paste("Accuracy:", accuracy))
-```
-
-## Nueral Network
-
-```{r}
 
 preProcValues <- preProcess(trainData, method = c("center", "scale"))
-
 trainDataNorm <- predict(preProcValues, trainData)
-
 testDataNorm <- predict(preProcValues, testData)
-
 
 # Building the Neural Network model
 
 # Adjust the hidden layer and neurons as needed
-
 nn_model <- neuralnet(fraud ~ ., data = trainDataNorm, hidden = c(5), linear.output = FALSE)
 
-
 # Making predictions
-
 predictions <- compute(nn_model, testDataNorm[, names(testDataNorm) != "fraud"])
-
 predictedClass <- ifelse(predictions$net.result > 0.5, 1, 0)
 
-
 # Evaluating the model
-
 confusionMatrix <- table(Predicted = predictedClass, Actual = testData$fraud)
-
 print(confusionMatrix)
 
-
 # Calculating accuracy
-
 accuracy <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
-
 print(paste("Accuracy:", accuracy))
 
-
-```
-
-```{r}
 # Assuming you have already loaded your dataset into a variable named 'data'
 
 # Preprocessing
@@ -135,7 +99,6 @@ set.seed(123) # for reproducibility
 indexes <- sample(1:nrow(normalized_data), size = 0.8 * nrow(normalized_data))
 x_train <- normalized_data[indexes,]
 y_train <- data$fraud[indexes]
-
 x_test <- normalized_data[-indexes,]
 y_test <- data$fraud[-indexes]
 
@@ -167,4 +130,3 @@ model %>% evaluate(x_test, y_test)
 
 # Predictions
 predictions <- model %>% predict_classes(x_test)
-```
