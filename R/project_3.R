@@ -8,7 +8,8 @@ library(pROC)
 library(dplyr)
 library(pROC)
 set.seed(5533)
-dataset <- read.csv("C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv")
+# dataset <- read.csv("C:/Users/Benjamin/development/credit-card-fraud-detection/datatset/card_transdata.csv")
+dataset <- read.csv("/Users/benjaminlindeen/developement/credit-card-fraud-detection/datatset/card_transdata.csv")
 
 # Apply log transformation to skewed variables
 dataset <- na.omit(dataset) # Data Manipulation
