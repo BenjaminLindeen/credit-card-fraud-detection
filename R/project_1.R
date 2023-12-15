@@ -25,84 +25,52 @@ splitIndex <- createDataPartition(data$fraud, p = .80, list = FALSE, times = 1)
 trainData <- data[splitIndex,]
 testData <- data[-splitIndex,]
 
-# Building the logistic regression model
 model <- glm(fraud ~ ., data = trainData, family = "binomial")
 
-# Making predictions
 predictions <- predict(model, testData, type = "response")
 predictedClass <- ifelse(predictions > 0.5, 1, 0)
 
-# Evaluating the model
 confusionMatrix <- table(Predicted = predictedClass, Actual = testData$fraud)
 precision <- confusionMatrix[2, 2] / sum(confusionMatrix[2,])
 recall <- confusionMatrix[2, 2] / sum(confusionMatrix[, 2])
 f1_score <- 2 * (precision * recall) / (precision + recall)
 
-# Print the metrics
 print(paste("Precision:", precision))
 print(paste("Recall:", recall))
 print(paste("F1-Score:", f1_score))
 
-# ROC Curve and AUC
 roc_result <- roc(testData$fraud, as.numeric(predictions))
 auc_value <- auc(roc_result)
-
-# Print AUC
 print(paste("AUC:", auc_value))
 
-# Plot ROC Curve
 model <- rpart(fraud ~ ., data = trainData, method = "class")
-
-# Plotting the tree
 rpart.plot(model, main = "Decision Tree", extra = 102, digits = 5)
-
-# Making predictions
 predictions <- predict(model, testData, type = "class")
-
-# Evaluating the model
 confusionMatrix <- table(Predicted = predictions, Actual = testData$fraud)
 print(confusionMatrix)
 
-# Calculating accuracy
 accuracy <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
 print(paste("Accuracy:", accuracy))
 
 preProcValues <- preProcess(trainData, method = c("center", "scale"))
 trainDataNorm <- predict(preProcValues, trainData)
 testDataNorm <- predict(preProcValues, testData)
-
-# Building the Neural Network model
-
-# Adjust the hidden layer and neurons as needed
 nn_model <- neuralnet(fraud ~ ., data = trainDataNorm, hidden = c(5), linear.output = FALSE)
-
-# Making predictions
 predictions <- compute(nn_model, testDataNorm[, names(testDataNorm) != "fraud"])
 predictedClass <- ifelse(predictions$net.result > 0.5, 1, 0)
-
-# Evaluating the model
 confusionMatrix <- table(Predicted = predictedClass, Actual = testData$fraud)
 print(confusionMatrix)
 
-# Calculating accuracy
 accuracy <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
 print(paste("Accuracy:", accuracy))
 
-# Assuming you have already loaded your dataset into a variable named 'data'
-
-# Preprocessing
-# Normalize your features
-normalized_data <- scale(data[1:7]) # Exclude the target variable
-
-# Splitting the dataset into training and testing sets
-set.seed(123) # for reproducibility
+normalized_data <- scale(data[1:7])
 indexes <- sample(1:nrow(normalized_data), size = 0.8 * nrow(normalized_data))
 x_train <- normalized_data[indexes,]
 y_train <- data$fraud[indexes]
 x_test <- normalized_data[-indexes,]
 y_test <- data$fraud[-indexes]
 
-# Building the ANN model
 model <- keras_model_sequential()
 model %>%
   layer_dense(units = 128, activation = 'relu', input_shape = c(7)) %>%
@@ -117,7 +85,6 @@ model %>% compile(
   metrics = c('accuracy')
 )
 
-# Training the model
 history <- model %>% fit(
   x_train, y_train,
   epochs = 50,
@@ -125,8 +92,5 @@ history <- model %>% fit(
   validation_split = 0.2
 )
 
-# Evaluate the model
 model %>% evaluate(x_test, y_test)
-
-# Predictions
 predictions <- model %>% predict_classes(x_test)
