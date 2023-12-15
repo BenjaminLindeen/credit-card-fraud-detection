@@ -41,7 +41,7 @@ testing <- dataset[-partition,]
 class_weights <- ifelse(training$fraud == 1, (1 / table(training$fraud)[2]), (1 / table(training$fraud)[1]))
 
 # Linear Regression Model
-lin_model <- lm(fraud ~ ., data = training)
+lin_model <- lm(fraud ~ ., data = training, weights = class_weights)
 summary(lin_model)  # This will give you the model summary including coefficients for each variable
 predictions_lin <- predict(lin_model, testing) # Predictions from the linear model
 predicted_classes_lin <- ifelse(predictions_lin > 0.5, 1, 0) # Thresholding at 0.5 to determine class labels, not recommended for actual classification tasks
