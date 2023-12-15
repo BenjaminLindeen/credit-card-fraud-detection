@@ -1,6 +1,8 @@
 
 # Credit Card Fraud Detection Project
 
+[![My Skills](https://skillicons.dev/icons?i=r,python,tensorflow)](https://skillicons.dev)
+
 ## Introduction
 This project focuses on detecting and predicting credit card fraud, a significant concern affecting hundreds of thousands of people annually. Using a comprehensive dataset containing over one million credit card transaction entries, including cases of reported fraud, we applied various data analysis and machine learning techniques to identify patterns and indicators of fraudulent activities.
 
@@ -22,7 +24,7 @@ The project hypothesizes that the deviation from the median transaction value an
 Each model's performance is evaluated using metrics like accuracy, confusion matrices, and specific case studies to understand the effectiveness in detecting fraud.
 
 ## Requirements
-- R and its libraries: caret, ggplot2, rpart, xgboost, pROC, dplyr
+- R and its libraries: caret, ggplot2, rpart, pROC, dplyr
 - Python and its libraries: pandas, numpy, sklearn, imblearn, tensorflow
 
 ## Setup and Execution
